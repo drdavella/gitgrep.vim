@@ -3,4 +3,4 @@ if !has('python3')
     finish
 endif
 
-pyfile gitgrep.py
+py3file gitgrep.py

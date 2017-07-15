@@ -1,3 +1,3 @@
 import vim
 
-print("IT WORKED!")
+print("IT WORKED IN PYTHON!")
