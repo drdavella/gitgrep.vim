@@ -1,1 +1,3 @@
-echo "HI VIM!"
+function! gitgrep#grep(...) abort
+    echo "HEY THERE!"
+endfunction
