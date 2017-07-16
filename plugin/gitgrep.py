@@ -1,2 +1,2 @@
 print("IT WORKED IN PYTHON!")
-print(vim)
+import vim
