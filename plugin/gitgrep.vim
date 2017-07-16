@@ -3,4 +3,7 @@ if !has('python3')
     finish
 endif
 
-py3file gitgrep.py
+python3 import sys
+python3 import vim
+python3 sys.path.append(vim.eval('expand("<sfile>:h")'))
+python3 import gitgrep
