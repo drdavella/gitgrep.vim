@@ -9,7 +9,7 @@ python3 sys.path.append(vim.eval('expand("<sfile>:h")'))
 
 
 function! GitGrep()
-python << endOfPython
+python3 << endOfPython
 
 import gitgrep
 gitgrep.gitgrep()
