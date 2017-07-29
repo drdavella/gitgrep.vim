@@ -46,10 +46,10 @@ def _display_and_handle(results):
             break
 
 def gitgrep():
-    results = run_gitgrep()
+    results = _run_gitgrep()
     if not results:
         return
 
-    screen_state = save_screen_state()
+    screen_state = _save_screen_state()
     _display_and_handle(results)
-    restore_screen_state(screen_state)
+    _restore_screen_state(screen_state)
