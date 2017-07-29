@@ -4,6 +4,6 @@ import random
 
 def gitgrep():
     while(True):
-        char = vim.command('nr2char(getchar())')
+        char = vim.command('call nr2char(getchar())')
         print(char)
 
