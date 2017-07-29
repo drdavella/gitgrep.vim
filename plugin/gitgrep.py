@@ -16,7 +16,7 @@ def _run_gitgrep():
 def _save_screen_state():
     current_line = _run_and_return('line(".")')
     current_col = _run_and_return('col(".")')
-    top_line = _run_and_return('w0')
+    top_line = _run_and_return('line("w0")')
     return (current_line, current_col, top_line)
 
 def _restore_screen_state(screen_state):
