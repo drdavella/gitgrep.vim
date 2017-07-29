@@ -9,3 +9,5 @@ def gitgrep():
         # Handle escape
         if ord(char) == 27:
             break
+        vim.current.buffer[0] = char
+        vim.command('redraw!')
