@@ -14,25 +14,36 @@ def _run_gitgrep():
     return ['hello', 'world', 'file', 'whatever', 'blurg']
 
 def _save_screen_state():
-    vim.command('enew')
     current_line = _run_and_return('line(".")')
     current_col = _run_and_return('col(".")')
     top_line = _run_and_return('line("w0")')
     return (current_line, current_col, top_line)
 
+def _set_cursor(line, col):
+    vim.command('call cursor({}, {})'.format(line, col))
+
 def _restore_screen_state(screen_state):
     vim.command('bdelete!')
     current_line, current_col, top_line = screen_state
-    vim.command('call cursor({}, 1)'.format(top_line))
+    _set_cursor(top_line, 1)
     vim.command('normal! zt')
-    vim.command('call cursor({}, {})'.format(current_line, current_col))
+    _set_cursor(current_line, current_col)
 
 def _get_user_input():
     return _run_and_return('nr2char(getchar())')
 
 def _display_and_handle(results):
+    # Open new buffer
+    vim.command('enew')
+    # Populate buffer with results
     vim.current.buffer[:] = results
     vim.command('redraw!')
+    # Set the cursor position
+    _set_cursor(1, 1)
+    vim.command('normal! zt')
+
+    current_line = 0
+    max_line = len(results) - 1
 
     while(True):
         try:
@@ -40,8 +51,13 @@ def _display_and_handle(results):
             # Handle escape
             if char == None or char == '':
                 continue
-            if char == 'q' or ord(char) == ESCAPE_CHAR:
+            elif char == 'q' or ord(char) == ESCAPE_CHAR:
                 break
+            elif char == 'j' and current_line > 0:
+                current_line -= 1
+            elif char == 'k' and current_line < max_line:
+                current_line += 1
+
             vim.current.buffer.append(char)
             vim.command('redraw!')
         except KeyboardInterrupt:
