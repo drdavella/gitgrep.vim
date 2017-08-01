@@ -40,7 +40,7 @@ def _display_and_handle(results):
             # Handle escape
             if char == None or char == '':
                 continue
-            if ord(char) == ESCAPE_CHAR:
+            if char == 'q' or ord(char) == ESCAPE_CHAR:
                 break
             vim.current.buffer.append(char)
             vim.command('redraw!')
