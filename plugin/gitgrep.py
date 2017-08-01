@@ -21,7 +21,7 @@ def _save_screen_state():
     return (current_line, current_col, top_line)
 
 def _restore_screen_state(screen_state):
-    vim.command('bdelete')
+    vim.command('bdelete!')
     current_line, current_col, top_line = screen_state
     vim.command('call cursor({}, 1)'.format(top_line))
     vim.command('normal! zt')
