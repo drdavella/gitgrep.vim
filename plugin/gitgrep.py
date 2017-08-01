@@ -11,7 +11,7 @@ def _run_and_return(command):
 
 def _run_gitgrep():
     # Just populate with dummy data for now
-    return ['hello', 'world', 'file', 'whatever', 'blurg']
+    return ['hello', 'world', 'file', 'whatever', 'blurg', 'WORK']
 
 def _save_screen_state():
     current_line = _run_and_return('line(".")')
@@ -53,12 +53,11 @@ def _display_and_handle(results):
                 continue
             elif char == 'q' or ord(char) == ESCAPE_CHAR:
                 break
-            elif char == 'j' and current_line > 0:
-                current_line -= 1
-            elif char == 'k' and current_line < max_line:
+            elif char == 'j' and current_line < max_line:
                 current_line += 1
+            elif char == 'k' and current_line > 0:
+                current_line -= 1
             _set_cursor(current_line+1, 1)
-            vim.command('normal! zt')
         except KeyboardInterrupt:
             break
 
