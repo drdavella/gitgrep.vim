@@ -37,10 +37,10 @@ def _display_and_handle(results):
     vim.command('enew')
     # Populate buffer with results
     vim.current.buffer[:] = results
-    vim.command('redraw!')
     # Set the cursor position
     _set_cursor(1, 1)
     vim.command('normal! zt')
+    vim.command('redraw!')
 
     current_line = 0
     max_line = len(results) - 1
