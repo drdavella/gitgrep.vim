@@ -14,12 +14,14 @@ def _run_gitgrep():
     return ['hello', 'world', 'file', 'whatever', 'blurg']
 
 def _save_screen_state():
+    vim.command('silent 1,$delete _')
     current_line = _run_and_return('line(".")')
     current_col = _run_and_return('col(".")')
     top_line = _run_and_return('line("w0")')
     return (current_line, current_col, top_line)
 
 def _restore_screen_state(screen_state):
+    vim.command('silent 1,1delete _')
     current_line, current_col, top_line = screen_state
     vim.command('call cursor({}, 1)'.format(top_line))
     vim.command('normal! zt')
