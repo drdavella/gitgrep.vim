@@ -59,6 +59,7 @@ def _display_and_handle(results):
             elif char == 'k' and current_line > 1:
                 current_line -= 1
             _set_cursor(current_line, 1)
+            vim.command('redraw!')
         except KeyboardInterrupt:
             break
 
