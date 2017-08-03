@@ -39,6 +39,7 @@ def _display_and_handle(results):
     # Populate buffer with results
     vim.current.buffer[:] = results
     # Set the cursor position
+    vim.current.buffer[0] = "HERE: " + results[0]
     vim.command('redraw!')
     _set_cursor(1, 1)
     vim.command('normal! zt')
@@ -49,6 +50,7 @@ def _display_and_handle(results):
     while(True):
         try:
             char = _get_user_input()
+            last_line = current_line
             # Handle escape
             if char == None or char == '':
                 continue
@@ -58,6 +60,7 @@ def _display_and_handle(results):
                 current_line += 1
             elif char == 'k' and current_line > 0:
                 current_line -= 1
+            vim.current.buffer[last_line] = results[last_line]
             vim.current.buffer[current_line] = "HERE: " + results[current_line]
             vim.command('redraw!')
         except KeyboardInterrupt:
