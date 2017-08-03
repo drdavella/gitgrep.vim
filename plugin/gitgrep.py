@@ -20,6 +20,7 @@ def _save_screen_state():
     return (current_line, current_col, top_line)
 
 def _set_cursor(line, col):
+    print("cursor:", line, col)
     vim.command('call cursor({}, {})'.format(line, col))
 
 def _restore_screen_state(screen_state):
