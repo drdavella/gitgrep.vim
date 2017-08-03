@@ -43,8 +43,8 @@ def _display_and_handle(results):
     _set_cursor(1, 1)
     vim.command('normal! zt')
 
-    current_line = 1
-    max_line = len(results)
+    current_line = 0
+    max_line = len(results) - 1
 
     while(True):
         try:
@@ -56,9 +56,9 @@ def _display_and_handle(results):
                 break
             elif char == 'j' and current_line < max_line:
                 current_line += 1
-            elif char == 'k' and current_line > 1:
+            elif char == 'k' and current_line > 0:
                 current_line -= 1
-            _set_cursor(current_line, 1)
+            vim.current.buffer[current_line] = "HERE: " + results[current_line]
             vim.command('redraw!')
         except KeyboardInterrupt:
             break
