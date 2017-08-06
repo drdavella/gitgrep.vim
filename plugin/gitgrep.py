@@ -34,7 +34,7 @@ def _get_user_input():
     return _run_and_return('nr2char(getchar())')
 
 def _underline(text):
-    return "\x1b[4m{}\x1b[0m".format(text)
+    return "\u+25b6 {}".format(text)
 
 def _display_and_handle(results):
     # Open new buffer
@@ -63,7 +63,7 @@ def _display_and_handle(results):
                 current_line += 1
             elif char == 'k' and current_line > 0:
                 current_line -= 1
-            vim.current.buffer[last_line] = results[last_line]
+            vim.current.buffer[last_line] = "  " + results[last_line]
             vim.current.buffer[current_line] = _underline(results[current_line])
             vim.command('redraw!')
         except KeyboardInterrupt:
