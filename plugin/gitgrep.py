@@ -34,7 +34,7 @@ def _get_user_input():
     return _run_and_return('nr2char(getchar())')
 
 def _underline(text):
-    return "".join([x + '\u0332' for x in text])
+    return "".join(['\u0332' + x for x in text])
 
 def _display_and_handle(results):
     # Open new buffer
