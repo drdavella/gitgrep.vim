@@ -34,7 +34,7 @@ def _get_user_input():
     return _run_and_return('nr2char(getchar())')
 
 def _underline(text):
-    return "\u+25b6 {}".format(text)
+    return "\u25b6 {}".format(text)
 
 def _display_and_handle(results):
     # Open new buffer
