@@ -20,7 +20,6 @@ def _save_screen_state():
     return (current_line, current_col, top_line)
 
 def _set_cursor(line, col):
-    print("cursor:", line, col)
     vim.command('call cursor({}, {})'.format(line, col))
 
 def _restore_screen_state(screen_state):
@@ -64,6 +63,9 @@ def _display_and_handle(results):
                 current_line += 1
             elif char == 'k' and current_line > 0:
                 current_line -= 1
+            elif ord(char) == 0x0a:
+                print(results[last_line])
+                continue
             vim.current.buffer[last_line] = "  " + results[last_line]
             vim.current.buffer[current_line] = _underline(results[current_line])
             vim.command('redraw!')
