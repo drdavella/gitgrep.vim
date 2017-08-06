@@ -34,7 +34,7 @@ def _get_user_input():
     return _run_and_return('nr2char(getchar())')
 
 def _underline(text):
-    return "\e[4m{}\e[0m".format(text)
+    return "\x1b[4m{}\x1b[0m".format(text)
 
 def _display_and_handle(results):
     # Open new buffer
