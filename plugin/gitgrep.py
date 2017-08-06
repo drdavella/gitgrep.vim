@@ -63,7 +63,7 @@ def _display_and_handle(results):
                 current_line += 1
             elif char == 'k' and current_line > 0:
                 current_line -= 1
-            elif ord(char) == 0x0a:
+            elif ord(char) == 0x0d:
                 print(results[last_line])
                 continue
             vim.current.buffer[last_line] = "  " + results[last_line]
