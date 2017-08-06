@@ -34,7 +34,7 @@ def _get_user_input():
     return _run_and_return('nr2char(getchar())')
 
 def _underline(text):
-    return "".join(['\u0332' + x for x in text])
+    return "".join([x + '\u0332' for x in text])
 
 def _display_and_handle(results):
     # Open new buffer
@@ -42,7 +42,7 @@ def _display_and_handle(results):
     # Populate buffer with results
     vim.current.buffer[:] = results
     # Set the cursor position
-    vim.current.buffer[0] = "HERE: " + results[0]
+    vim.current.buffer[0] = _underline(results[0])
     vim.command('redraw!')
     _set_cursor(1, 1)
     vim.command('normal! zt')
