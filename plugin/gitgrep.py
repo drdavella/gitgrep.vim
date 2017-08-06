@@ -40,7 +40,7 @@ def _display_and_handle(results):
     # Open new buffer
     vim.command('enew')
     # Populate buffer with results
-    vim.current.buffer[:] = results
+    vim.current.buffer[:] = ["  " + x for x in results]
     # Set the cursor position
     vim.current.buffer[0] = _underline(results[0])
     vim.command('redraw!')
