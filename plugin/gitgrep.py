@@ -33,6 +33,9 @@ def _restore_screen_state(screen_state):
 def _get_user_input():
     return _run_and_return('nr2char(getchar())')
 
+def _underline(text):
+    return "".join([x + '\u0332' for x in text])
+
 def _display_and_handle(results):
     # Open new buffer
     vim.command('enew')
@@ -61,7 +64,7 @@ def _display_and_handle(results):
             elif char == 'k' and current_line > 0:
                 current_line -= 1
             vim.current.buffer[last_line] = results[last_line]
-            vim.current.buffer[current_line] = "HERE: " + results[current_line]
+            vim.current.buffer[current_line] = _underline(results[current_line])
             vim.command('redraw!')
         except KeyboardInterrupt:
             break
