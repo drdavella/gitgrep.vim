@@ -43,7 +43,7 @@ def _display_and_handle(results):
     vim.current.buffer[:] = ["  " + x for x in results]
     # Set the cursor position
     vim.current.buffer[0] = _underline(results[0])
-    vim.command('setlocal nomodifiable')
+    vim.command('set nomodified')
     vim.command('redraw!')
     _set_cursor(1, 1)
     vim.command('normal! zt')
@@ -67,10 +67,9 @@ def _display_and_handle(results):
             elif ord(char) == 0x0d:
                 print(results[last_line])
                 continue
-            vim.command('setlocal modifiable')
             vim.current.buffer[last_line] = "  " + results[last_line]
             vim.current.buffer[current_line] = _underline(results[current_line])
-            vim.command('setlocal nomodifiable')
+            vim.command('set nomodified')
             vim.command('redraw!')
         except KeyboardInterrupt:
             break
