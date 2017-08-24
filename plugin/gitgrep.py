@@ -27,7 +27,7 @@ def _run_gitgrep(git_dir, pattern):
         print(result.stderr.read())
         return None
     string = result.stdout.read()
-    return string.splitlines()
+    return [x.decode('utf-8') for x in string.splitlines()]
 
 def _save_screen_state():
     current_line = _run_and_return('line(".")')
