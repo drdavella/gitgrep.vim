@@ -38,7 +38,7 @@ def _underline(text):
 def _display_and_handle(pattern, results):
     # Open new buffer
     vim.command('enew')
-    vim.command('file GitGrep: {}'.format(pattern))
+    vim.command('file GitGrep:\ pattern={}'.format(pattern))
     # Populate buffer with results
     vim.current.buffer[:] = ["  " + x for x in results]
     # Set the cursor position
