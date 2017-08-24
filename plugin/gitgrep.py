@@ -9,7 +9,7 @@ def _run_and_return(command):
     vim.command('let {} = {}'.format(varname, command))
     return vim.eval(varname)
 
-def _run_gitgrep():
+def _run_gitgrep(pattern):
     # Just populate with dummy data for now
     return ['hello', 'world', 'file', 'whatever', 'blurg', 'WORK']
 
@@ -35,10 +35,10 @@ def _get_user_input():
 def _underline(text):
     return "\u25b6 {}".format(text)
 
-def _display_and_handle(results):
+def _display_and_handle(pattern, results):
     # Open new buffer
     vim.command('enew')
-    vim.command('file GitGrep')
+    vim.command('file GitGrep: {}'.format(pattern))
     # Populate buffer with results
     vim.current.buffer[:] = ["  " + x for x in results]
     # Set the cursor position
@@ -74,11 +74,11 @@ def _display_and_handle(results):
         except KeyboardInterrupt:
             break
 
-def gitgrep():
-    results = _run_gitgrep()
+def gitgrep(pattern):
+    results = _run_gitgrep(pattern)
     if not results:
         return
 
     screen_state = _save_screen_state()
-    _display_and_handle(results)
+    _display_and_handle(pattern, results)
     _restore_screen_state(screen_state)

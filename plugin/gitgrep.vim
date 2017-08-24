@@ -8,11 +8,11 @@ python3 import vim
 python3 sys.path.append(vim.eval('expand("<sfile>:h")'))
 
 
-function! GitGrep()
+function! GitGrep(pattern)
 python3 << endOfPython
 
 import gitgrep
-gitgrep.gitgrep()
+gitgrep.gitgrep(vim.eval('pattern'))
 
 endOfPython
 endfunction
@@ -20,4 +20,4 @@ endfunction
 " --------------------------------
 "  Expose our commands to the user
 " --------------------------------
-command! GitGrep call GitGrep()
+command! -nargs=1 GitGrep call GitGrep(<f-args>)
