@@ -12,7 +12,7 @@ function! GitGrep(pattern)
 python3 << endOfPython
 
 import gitgrep
-gitgrep.gitgrep(vim.eval('pattern'))
+gitgrep.gitgrep(vim.eval('a:pattern'))
 
 endOfPython
 endfunction
