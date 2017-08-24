@@ -1,17 +1,33 @@
 import vim
 import time
 import random
+from subprocess import Popen, PIPE
 
 ESCAPE_CHAR = 27
+GIT_CMD = ['git', '--no-pager']
 
 def _run_and_return(command):
     varname = 'tempvar'
     vim.command('let {} = {}'.format(varname, command))
     return vim.eval(varname)
 
-def _run_gitgrep(pattern):
-    # Just populate with dummy data for now
-    return ['hello', 'world', 'file', 'whatever', 'blurg', 'WORK']
+def _find_top_level():
+    command = GIT_CMD + ['rev-parse', '--show-toplevel']
+    result = Popen(command, stdout=PIPE, stderr=PIPE)
+    if result.wait() != 0:
+        return None
+    top_dir = result.stdout.read()
+    return top_dir.strip()
+
+def _run_gitgrep(git_dir, pattern):
+    command = GIT_CMD + ['grep', '-e', pattern, '--', git_dir]
+    print(command)
+    result = Popen(command, stdout=PIPE, stderr=PIPE)
+    if result.wait() != 0:
+        print(result.stderr.read())
+        return None
+    string = result.stdout.read()
+    return string.splitlines()
 
 def _save_screen_state():
     current_line = _run_and_return('line(".")')
@@ -75,7 +91,12 @@ def _display_and_handle(pattern, results):
             break
 
 def gitgrep(pattern):
-    results = _run_gitgrep(pattern)
+
+    git_dir = _find_top_level()
+    if git_dir is None:
+        return
+
+    results = _run_gitgrep(git_dir, pattern)
     if not results:
         return
 
