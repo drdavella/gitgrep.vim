@@ -91,7 +91,7 @@ def _display_and_handle(pattern, results):
             vim.command('set nomodified')
             vim.command('redraw!')
             # Sleep a small time to give the screen time to refresh
-            time.sleep(0.025)
+            time.sleep(0.05)
         except KeyboardInterrupt:
             break
 
