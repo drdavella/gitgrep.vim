@@ -86,7 +86,7 @@ def _display_and_handle(pattern, results):
             vim.current.buffer[last_line] = "  " + results[last_line]
             vim.current.buffer[current_line] = _underline(results[current_line])
             vim.command('set nomodified')
-            #vim.command('redraw!')
+            vim.command('redraw!')
         except KeyboardInterrupt:
             break
 
