@@ -83,12 +83,15 @@ def _display_and_handle(pattern, results):
             elif ord(char) == 0x0d:
                 print(results[last_line])
                 continue
+            # No update if no change
+            if last_line == current_line:
+                continue
             vim.current.buffer[last_line] = "  " + results[last_line]
             vim.current.buffer[current_line] = _underline(results[current_line])
             vim.command('set nomodified')
             vim.command('redraw!')
             # Sleep a small time to give the screen time to refresh
-            time.sleep(0.05)
+            time.sleep(0.025)
         except KeyboardInterrupt:
             break
 
