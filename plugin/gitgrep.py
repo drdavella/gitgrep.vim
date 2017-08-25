@@ -87,6 +87,8 @@ def _display_and_handle(pattern, results):
             vim.current.buffer[current_line] = _underline(results[current_line])
             vim.command('set nomodified')
             vim.command('redraw!')
+            # Sleep a small time to give the screen time to refresh
+            time.sleep(0.075)
         except KeyboardInterrupt:
             break
 
