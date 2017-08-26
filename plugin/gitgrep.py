@@ -88,6 +88,7 @@ def _display_and_handle(pattern, results):
                 continue
             vim.current.buffer[last_line] = "  " + results[last_line]
             vim.current.buffer[current_line] = _underline(results[current_line])
+            _set_cursor(current_line+1, 1)
             vim.command('set nomodified')
             # Do not clear screen in an effort to improve performance
             vim.command('redraw')
