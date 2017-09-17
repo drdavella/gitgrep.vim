@@ -45,11 +45,23 @@ def _restore_screen_state(screen_state):
     vim.command('normal! zt')
     _set_cursor(current_line, current_col)
 
+def _highlight_term(pattern):
+    vim.command("highlight GitGrepMatch ctermbg=red guibg=red")
+    vim.command("match GitGrepMatch /{}/".format(pattern))
+
+def _display_result_file(pattern, filename, line):
+    vim.command('e +{} {}'.format(line, filename))
+    #_highlight_term(pattern)
+
 def _get_user_input():
     return _run_and_return('nr2char(getchar())')
 
 def _underline(text):
     return "\u25b6 {}".format(text)
+
+def _parse_file_and_line(result):
+    filename, line = result.split(':')[:2]
+    return filename, line
 
 def _display_and_handle(pattern, results):
     # Open new buffer
@@ -81,8 +93,7 @@ def _display_and_handle(pattern, results):
             elif char == 'k' and current_line > 0:
                 current_line -= 1
             elif ord(char) == 0x0d:
-                print(results[last_line])
-                continue
+                return _parse_file_and_line(results[last_line])
             # No update if no change
             if last_line == current_line:
                 continue
@@ -95,6 +106,8 @@ def _display_and_handle(pattern, results):
         except KeyboardInterrupt:
             break
 
+    return None
+
 def gitgrep(pattern):
 
     git_dir = _find_top_level()
@@ -106,5 +119,11 @@ def gitgrep(pattern):
         return
 
     screen_state = _save_screen_state()
-    _display_and_handle(pattern, results)
+    location = _display_and_handle(pattern, results)
     _restore_screen_state(screen_state)
+
+    if location is None:
+        return
+
+    filename, line = location
+    _display_result_file(pattern, filename, line)
