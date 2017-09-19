@@ -2,6 +2,7 @@ import vim
 import time
 import random
 from subprocess import Popen, PIPE
+from collections import OrderedDict
 
 ESCAPE_CHAR = 27
 GIT_CMD = ['git', '--no-pager']
@@ -21,13 +22,22 @@ def _find_top_level():
 
 def _run_gitgrep(git_dir, pattern):
     command = GIT_CMD + ['grep', '-e', pattern, '--', git_dir]
-    print(command)
     result = Popen(command, stdout=PIPE, stderr=PIPE)
     if result.wait() != 0:
-        print(result.stderr.read())
         return None
     string = result.stdout.read()
     return [x.decode('utf-8') for x in string.splitlines()]
+
+def _process_results(result_list):
+    results = OrderedDict()
+
+    for item in result_list:
+        # Make sure not to split on colons in the actual source line
+        filename, lineno, content = item.split(':', maxsplit=2)
+        if filename not in results:
+            results[filename] = list()
+        results[filename].append((lineno, content))
+    return results
 
 def _save_screen_state():
     current_line = _run_and_return('line(".")')
@@ -57,7 +67,8 @@ def _get_user_input():
     return _run_and_return('nr2char(getchar())')
 
 def _underline(text):
-    return "\u25b6 {}".format(text)
+    space = '  ' if text.startswith('    ') else ''
+    return "\u25b6 {}{}".format(space, text.lstrip())
 
 def _parse_file_and_line(result):
     filename, line = result.split(':')[:2]
@@ -67,39 +78,51 @@ def _display_and_handle(pattern, results):
     # Open new buffer
     vim.command('enew')
     vim.command('file GitGrep:\ pattern={}'.format(pattern))
+
     # Populate buffer with results
-    vim.current.buffer[:] = ["  " + x for x in results]
+    index = 0
+    skiplines = list()
+    for filename in results:
+        vim.current.buffer.append("  " + filename)
+        skiplines.append(index)
+        index += 1
+        for lineno, content in results[filename]:
+            vim.current.buffer.append("    {}:{}".format(lineno, content))
+            index += 1
+    max_line = index
+
     # Set the cursor position
-    vim.current.buffer[0] = _underline(results[0])
+    index = 0
+    current_line = vim.current.buffer[index]
+    vim.current.buffer[index] = _underline(vim.current.buffer[index])
     vim.command('set nomodified')
     vim.command('redraw!')
     _set_cursor(1, 1)
     vim.command('normal! zt')
 
-    current_line = 0
-    max_line = len(results) - 1
-
     while(True):
         try:
             char = _get_user_input()
+            last_index = index
             last_line = current_line
             # Handle escape
             if char == None or char == '':
                 continue
             elif char == 'q' or ord(char) == ESCAPE_CHAR:
                 break
-            elif char == 'j' and current_line < max_line:
-                current_line += 1
-            elif char == 'k' and current_line > 0:
-                current_line -= 1
+            elif char == 'j' and index < max_line:
+                index += 1
+            elif char == 'k' and index > 0:
+                index -= 1
             elif ord(char) == 0x0d:
                 return _parse_file_and_line(results[last_line])
             # No update if no change
-            if last_line == current_line:
+            if last_index == index:
                 continue
-            vim.current.buffer[last_line] = "  " + results[last_line]
-            vim.current.buffer[current_line] = _underline(results[current_line])
-            _set_cursor(current_line+1, 1)
+            current_line = vim.current.buffer[index]
+            vim.current.buffer[last_index] = last_line
+            vim.current.buffer[index] = _underline(current_line)
+            _set_cursor(index+1, 1)
             vim.command('set nomodified')
             # Do not clear screen in an effort to improve performance
             vim.command('redraw')
@@ -114,9 +137,11 @@ def gitgrep(pattern):
     if git_dir is None:
         return
 
-    results = _run_gitgrep(git_dir, pattern)
-    if not results:
+    result_list = _run_gitgrep(git_dir, pattern)
+    if not result_list:
         return
+
+    results = _process_results(result_list)
 
     screen_state = _save_screen_state()
     location = _display_and_handle(pattern, results)
