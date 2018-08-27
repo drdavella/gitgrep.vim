@@ -83,13 +83,16 @@ def _display_and_handle(pattern, results):
     index = 0
     skiplines = list()
     for filename in results:
-        vim.current.buffer.append("  " + filename)
+        if index == 0:
+            vim.current.buffer[0] = "  " + filename
+        else:
+            vim.current.buffer.append("  " + filename)
         skiplines.append(index)
         index += 1
         for lineno, content in results[filename]:
             vim.current.buffer.append("    {}:{}".format(lineno, content))
             index += 1
-    max_line = index
+    max_line = index - 1
 
     # Set the cursor position
     index = 0
