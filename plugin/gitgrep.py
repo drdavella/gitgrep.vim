@@ -70,36 +70,59 @@ def _underline(text):
     space = '  ' if text.startswith('    ') else ''
     return "\u25b6 {}{}".format(space, text.lstrip())
 
+def _clear_current_buffer():
+
+    # This is possibly a total hack
+    while len(vim.current.buffer) > 1:
+        del vim.current.buffer[0]
+
+def _display_file_list(results, open_set):
+
+    index = 0
+    file_lines = list()
+    line_lookup = dict()
+
+    _clear_current_buffer()
+
+    # Populate buffer with results
+    for i, filename in enumerate(results):
+
+        num_results = len(results[filename])
+        plural = "s" if num_results > 1 else ""
+        file_header = "  {} ({} result{})".format(filename, num_results, plural)
+
+        if index == 0:
+            vim.current.buffer[0] = file_header
+        else:
+            vim.current.buffer.append(file_header)
+        file_lines.append(index)
+        index += 1
+
+        lineno_width = len(str(results[filename][-1][0]))
+
+        if i in open_set:
+            for lineno, content in results[filename]:
+                new_string = "    {lineno:{width}}{content}".format(
+                    lineno=lineno+':', width=lineno_width+1, content=content)
+                vim.current.buffer.append(new_string)
+                line_lookup[new_string] = (filename, lineno)
+                index += 1
+    max_line = index - 1
+
+    return max_line, file_lines, line_lookup
+
 def _display_and_handle(pattern, results):
     # Open new buffer
     vim.command('enew')
     vim.command('file GitGrep:\ pattern={}'.format(pattern))
 
-    line_lookup = {}
+    open_files = set()
 
     # Populate buffer with results
-    index = 0
-    skiplines = list()
-    for filename in results:
-        if index == 0:
-            vim.current.buffer[0] = "  " + filename
-        else:
-            vim.current.buffer.append("  " + filename)
-        skiplines.append(index)
-        index += 1
-
-        lineno_width = len(str(results[filename][-1][0]))
-
-        for lineno, content in results[filename]:
-            new_string = "    {lineno:{width}}{content}".format(
-                lineno=lineno+':', width=lineno_width+1, content=content)
-            vim.current.buffer.append(new_string)
-            line_lookup[new_string] = (filename, lineno)
-            index += 1
-    max_line = index - 1
+    max_line, file_lines, line_lookup = _display_file_list(results, open_files)
 
     # Set the cursor position
-    index = 1
+    index = 0
     current_line = vim.current.buffer[index]
     vim.current.buffer[index] = _underline(vim.current.buffer[index])
     vim.command('set wrap!')
@@ -114,26 +137,30 @@ def _display_and_handle(pattern, results):
             char = _get_user_input()
             last_index = index
             last_line = current_line
+            redraw = False
             # Handle escape
             if char == None or char == '':
                 continue
             elif char == 'q' or ord(char) == ESCAPE_CHAR:
                 break
             elif char == 'j' and index < max_line:
-                if (index + 1) in skiplines and (index + 1) < max_line:
-                    index += 2
-                else:
-                    index += 1
-            elif char == 'k' and index > 1:
-                if (index - 1) in skiplines and (index - 1) > 1:
-                    index -= 2
-                else:
-                    index -= 1
+                index += 1
+            elif char == 'k' and index > 0:
+                index -= 1
             elif ord(char) == 0x0d:
-                return line_lookup[last_line]
+                if last_index in file_lines:
+                    if last_index in open_files:
+                        open_files.remove(last_index)
+                    else:
+                        open_files.add(last_index)
+                    max_line, file_lines, line_loopup = _display_file_list(results, open_files)
+                    redraw = True
+                else:
+                    return line_lookup[last_line]
             # No update if no change
-            if last_index == index:
+            if not redraw and last_index == index:
                 continue
+
             current_line = vim.current.buffer[index]
             vim.current.buffer[last_index] = last_line
             vim.current.buffer[index] = _underline(current_line)
