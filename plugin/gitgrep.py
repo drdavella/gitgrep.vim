@@ -95,7 +95,7 @@ def _display_and_handle(pattern, results):
     max_line = index - 1
 
     # Set the cursor position
-    index = 0
+    index = 1
     current_line = vim.current.buffer[index]
     vim.current.buffer[index] = _underline(vim.current.buffer[index])
     vim.command('set nomodified')
@@ -114,9 +114,15 @@ def _display_and_handle(pattern, results):
             elif char == 'q' or ord(char) == ESCAPE_CHAR:
                 break
             elif char == 'j' and index < max_line:
-                index += 1
-            elif char == 'k' and index > 0:
-                index -= 1
+                if (index + 1) in skiplines and (index + 1) < max_line:
+                    index += 2
+                else:
+                    index += 1
+            elif char == 'k' and index > 1:
+                if (index - 1) in skiplines and (index - 1) > 1:
+                    index -= 2
+                else:
+                    index -= 1
             elif ord(char) == 0x0d:
                 return _parse_file_and_line(results[last_line])
             # No update if no change
