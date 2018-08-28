@@ -87,8 +87,12 @@ def _display_and_handle(pattern, results):
             vim.current.buffer.append("  " + filename)
         skiplines.append(index)
         index += 1
+
+        lineno_width = len(str(results[filename][-1][0]))
+
         for lineno, content in results[filename]:
-            new_string = "    {}:{}".format(lineno, content)
+            new_string = "    {lineno:{width}}{content}".format(
+                lineno=lineno+':', width=lineno_width+1, content=content)
             vim.current.buffer.append(new_string)
             line_lookup[new_string] = (filename, lineno)
             index += 1
