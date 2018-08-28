@@ -70,14 +70,12 @@ def _underline(text):
     space = '  ' if text.startswith('    ') else ''
     return "\u25b6 {}{}".format(space, text.lstrip())
 
-def _parse_file_and_line(result):
-    filename, line = result.split(':')[:2]
-    return filename, line
-
 def _display_and_handle(pattern, results):
     # Open new buffer
     vim.command('enew')
     vim.command('file GitGrep:\ pattern={}'.format(pattern))
+
+    line_lookup = {}
 
     # Populate buffer with results
     index = 0
@@ -90,7 +88,9 @@ def _display_and_handle(pattern, results):
         skiplines.append(index)
         index += 1
         for lineno, content in results[filename]:
-            vim.current.buffer.append("    {}:{}".format(lineno, content))
+            new_string = "    {}:{}".format(lineno, content)
+            vim.current.buffer.append(new_string)
+            line_lookup[new_string] = (filename, lineno)
             index += 1
     max_line = index - 1
 
@@ -124,7 +124,7 @@ def _display_and_handle(pattern, results):
                 else:
                     index -= 1
             elif ord(char) == 0x0d:
-                return _parse_file_and_line(results[last_line])
+                return line_lookup[last_line]
             # No update if no change
             if last_index == index:
                 continue
