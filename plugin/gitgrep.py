@@ -102,6 +102,7 @@ def _display_and_handle(pattern, results):
     index = 1
     current_line = vim.current.buffer[index]
     vim.current.buffer[index] = _underline(vim.current.buffer[index])
+    vim.command('set wrap!')
     vim.command('set nomodified')
     vim.command('redraw!')
     _set_cursor(1, 1)
