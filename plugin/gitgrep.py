@@ -66,7 +66,7 @@ def _display_result_file(pattern, filename, line):
 def _get_user_input():
     return _run_and_return('nr2char(getchar())')
 
-def _underline(text):
+def _add_line_marker(text):
     space = '  ' if text.startswith('    ') else ''
     return "\u25b6 {}{}".format(space, text.lstrip())
 
@@ -125,11 +125,12 @@ def _display_and_handle(pattern, results):
     # Set the cursor position
     index = 0
     current_line = vim.current.buffer[index]
-    vim.current.buffer[index] = _underline(vim.current.buffer[index])
+    vim.current.buffer[index] = _add_line_marker(vim.current.buffer[index])
 
     vim.command('/{}'.format(pattern))
     _set_cursor(1, 1)
     vim.command('setlocal wrap!')
+    vim.command('setlocal cursorline')
     vim.command('redraw!')
 
     while(True):
@@ -163,7 +164,7 @@ def _display_and_handle(pattern, results):
 
             current_line = vim.current.buffer[index]
             vim.current.buffer[last_index] = last_line
-            vim.current.buffer[index] = _underline(current_line)
+            vim.current.buffer[index] = _add_line_marker(current_line)
             _set_cursor(index+1, 1)
             # Do not clear screen in an effort to improve performance
             vim.command('redraw')
