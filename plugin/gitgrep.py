@@ -127,7 +127,7 @@ def _display_and_handle(pattern, results):
     current_line = vim.current.buffer[index]
     vim.current.buffer[index] = _add_line_marker(vim.current.buffer[index])
 
-    vim.command('/{}'.format(pattern))
+    vim.command('silent! /{}'.format(pattern))
     _set_cursor(1, 1)
     vim.command('setlocal wrap!')
     vim.command('setlocal cursorline')
