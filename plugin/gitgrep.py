@@ -70,46 +70,67 @@ def _add_line_marker(text):
     space = '  ' if text.startswith('    ') else ''
     return "\u25b6 {}{}".format(space, text.lstrip())
 
-def _clear_current_buffer():
+class DisplayTree:
 
-    # This is possibly a total hack
-    while len(vim.current.buffer) > 1:
-        del vim.current.buffer[0]
+    def __init__(self, results):
+        self.open = [False for _ in range(len(results))]
+        self.index_map = {i:x for i, x in enumerate(results)}
+        self._generate_result_tree(results)
+        self.max_line = 0
 
-def _display_file_list(results, open_set):
+    def _generate_result_tree(self, results):
+        self._line_lookup = dict()
+        self._result_tree = OrderedDict()
 
-    index = 0
-    file_lines = list()
-    line_lookup = dict()
-
-    _clear_current_buffer()
-
-    # Populate buffer with results
-    for i, filename in enumerate(results):
-
-        num_results = len(results[filename])
-        plural = "s" if num_results > 1 else ""
-        file_header = "  {} ({} result{})".format(filename, num_results, plural)
-
-        if index == 0:
-            vim.current.buffer[0] = file_header
-        else:
-            vim.current.buffer.append(file_header)
-        file_lines.append(index)
-        index += 1
-
-        lineno_width = len(str(results[filename][-1][0]))
-
-        if i in open_set:
-            for lineno, content in results[filename]:
+        for filename, result in results.items():
+            self._result_tree[filename] = list()
+            lineno_width = len(str(result[-1][0]))
+            for lineno, content in result:
                 new_string = "    {lineno:{width}}{content}".format(
                     lineno=lineno+':', width=lineno_width+1, content=content)
-                vim.current.buffer.append(new_string)
-                line_lookup[new_string] = (filename, lineno)
-                index += 1
-    max_line = index - 1
+                self._result_tree[filename].append(new_string)
+                self._line_lookup[new_string] = (lineno, filename)
 
-    return max_line, file_lines, line_lookup
+    def _clear_current_buffer(self):
+        # This is possibly a total hack
+        while len(vim.current.buffer) > 1:
+            del vim.current.buffer[0]
+
+    def display(self):
+        self._clear_current_buffer()
+
+        index = 0
+        for i, filename in enumerate(self._result_tree):
+            num_results = len(self._result_tree[filename])
+            plural = "s" if num_results > 1 else ""
+            file_header = "  {} ({} result{})".format(filename, num_results, plural)
+
+            if index == 0:
+                vim.current.buffer[0] = file_header
+            else:
+                vim.current.buffer.append(file_header)
+
+            if self.open[i]:
+                for line in self._result_tree[filename]:
+                    vim.current.buffer.append(line)
+                    index =+ 1
+
+            index += 1
+
+        self.max_line = index - 1
+
+    def process(self, selected_index):
+
+        index = 0
+        for i, filename in enumerate(self._result_tree):
+            if index == selected_index:
+                self.open[i] = not self.open[i]
+                break
+            if self.open[i]:
+                index += len(self._result_tree[filename])
+            index += 1
+
+        self.display()
 
 def _display_and_handle(pattern, results):
     # Open new buffer
@@ -117,13 +138,11 @@ def _display_and_handle(pattern, results):
     vim.command('setlocal buftype=nofile')
     vim.command('file GitGrep:\ pattern={}'.format(pattern))
 
-    open_files = set()
+    dt = DisplayTree(results)
+    dt.display()
 
-    # Populate buffer with results
-    max_line, file_lines, line_lookup = _display_file_list(results, open_files)
-
-    # Set the cursor position
     index = 0
+    # Populate buffer with results
     current_line = vim.current.buffer[index]
     vim.current.buffer[index] = _add_line_marker(vim.current.buffer[index])
 
@@ -135,6 +154,7 @@ def _display_and_handle(pattern, results):
 
     while(True):
         try:
+            closing = None
             char = _get_user_input()
             last_index = index
             last_line = current_line
@@ -144,20 +164,16 @@ def _display_and_handle(pattern, results):
                 continue
             elif char == 'q' or ord(char) == ESCAPE_CHAR:
                 break
-            elif char == 'j' and index < max_line:
+            elif char == 'j' and index < dt.max_line:
                 index += 1
             elif char == 'k' and index > 0:
                 index -= 1
             elif ord(char) == 0x0d:
-                if last_index in file_lines:
-                    if last_index in open_files:
-                        open_files.remove(last_index)
-                    else:
-                        open_files.add(last_index)
-                    max_line, file_lines, line_loopup = _display_file_list(results, open_files)
-                    redraw = True
-                else:
-                    return line_lookup[last_line]
+                result = dt.process(last_index)
+                if result:
+                    return result
+
+                redraw = True
             # No update if no change
             if not redraw and last_index == index:
                 continue
