@@ -114,6 +114,7 @@ def _display_file_list(results, open_set):
 def _display_and_handle(pattern, results):
     # Open new buffer
     vim.command('enew')
+    vim.command('setlocal buftype=nofile')
     vim.command('file GitGrep:\ pattern={}'.format(pattern))
 
     open_files = set()
@@ -125,12 +126,11 @@ def _display_and_handle(pattern, results):
     index = 0
     current_line = vim.current.buffer[index]
     vim.current.buffer[index] = _underline(vim.current.buffer[index])
-    vim.command('set wrap!')
+
     vim.command('/{}'.format(pattern))
-    vim.command('set nomodified')
-    vim.command('redraw!')
     _set_cursor(1, 1)
-    vim.command('normal! zt')
+    vim.command('setlocal wrap!')
+    vim.command('redraw!')
 
     while(True):
         try:
@@ -165,7 +165,6 @@ def _display_and_handle(pattern, results):
             vim.current.buffer[last_index] = last_line
             vim.current.buffer[index] = _underline(current_line)
             _set_cursor(index+1, 1)
-            vim.command('set nomodified')
             # Do not clear screen in an effort to improve performance
             vim.command('redraw')
         except KeyboardInterrupt:
