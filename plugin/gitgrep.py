@@ -148,6 +148,7 @@ def _display_and_handle(pattern, results):
 
     vim.command('silent! /{}'.format(pattern))
     _set_cursor(1, 1)
+    vim.command('normal! zt')
     vim.command('setlocal wrap!')
     vim.command('setlocal cursorline')
     vim.command('redraw!')
