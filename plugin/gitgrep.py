@@ -89,7 +89,7 @@ class DisplayTree:
                 new_string = "    {lineno:{width}}{content}".format(
                     lineno=lineno+':', width=lineno_width+1, content=content)
                 self._result_tree[filename].append(new_string)
-                self._line_lookup[new_string] = (lineno, filename)
+                self._line_lookup[new_string] = (filename, lineno)
 
     def _clear_current_buffer(self):
         # This is possibly a total hack
@@ -113,7 +113,7 @@ class DisplayTree:
             if self.open[i]:
                 for line in self._result_tree[filename]:
                     vim.current.buffer.append(line)
-                    index =+ 1
+                    index += 1
 
             index += 1
 
@@ -127,10 +127,14 @@ class DisplayTree:
                 self.open[i] = not self.open[i]
                 break
             if self.open[i]:
-                index += len(self._result_tree[filename])
+                for line in self._result_tree[filename]:
+                    index += 1
+                    if index == selected_index:
+                        return self._line_lookup[line]
             index += 1
 
         self.display()
+        return None
 
 def _display_and_handle(pattern, results):
     # Open new buffer
